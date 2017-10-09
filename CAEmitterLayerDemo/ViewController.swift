@@ -50,10 +50,10 @@ class ViewController: UIViewController {
             snowWeather()
         }
     }
+    
     func snowWeather() {
 
         backgroundImage.image = UIImage(named: "snowBackground")
-
 
         snowEmitter.emitterPosition = CGPoint(x: self.view.bounds.size.width / 2.0, y: -30)         // 发射源位置
         snowEmitter.emitterSize = CGSize(width: self.view.bounds.size.width * 2.0, height: 0.0)     // 发射源大小
@@ -105,7 +105,6 @@ class ViewController: UIViewController {
 
     func rainWeather() {
         backgroundImage.image = UIImage(named:"rainBackground")
-
 
         rainEmitter.emitterPosition = CGPoint(x: self.view.bounds.size.width / 2.0, y: -30)
         rainEmitter.emitterSize = CGSize(width: self.view.bounds.width * 2.0, height: 0)
