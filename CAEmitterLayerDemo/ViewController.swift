@@ -11,9 +11,11 @@ import UIKit
 class ViewController: UIViewController {
 
     var backgroundImage = UIImageView()
+    var fireWorks = [CAEmitterCell]()
     let snowEmitter = CAEmitterLayer()
     let fogEmitter = CAEmitterLayer()
     let rainEmitter = CAEmitterLayer()
+    let fireWorkEmitter = CAEmitterLayer()
 
     @IBOutlet weak var contentView: UIView!
 
@@ -22,6 +24,7 @@ class ViewController: UIViewController {
         backgroundImage.frame = self.view.bounds
         self.contentView.addSubview(backgroundImage)
         snowWeather()
+//        fireworks()
         // Do any additional setup after loading the view, typically from a nib.
     }
 
@@ -33,6 +36,7 @@ class ViewController: UIViewController {
     @IBAction func segmentedClick(_ sender: UISegmentedControl) {
         switch sender.selectedSegmentIndex {
         case 0:
+            
             self.rainEmitter.removeFromSuperlayer()
             self.fogEmitter.removeFromSuperlayer()
             snowWeather()
@@ -44,13 +48,18 @@ class ViewController: UIViewController {
             self.rainEmitter.removeFromSuperlayer()
             self.snowEmitter.removeFromSuperlayer()
             fogWeather()
+        case 3:
+            self.rainEmitter.removeFromSuperlayer()
+            self.snowEmitter.removeFromSuperlayer()
+            fireworks()
+            boom()
         default:
             self.rainEmitter.removeFromSuperlayer()
             self.fogEmitter.removeFromSuperlayer()
             snowWeather()
         }
     }
-    
+
     func snowWeather() {
 
         backgroundImage.image = UIImage(named: "snowBackground")
@@ -88,8 +97,10 @@ class ViewController: UIViewController {
         fogEmitter.emitterSize = CGSize(width: 1, height: 20)
         fogEmitter.emitterShape = kCAEmitterLayerLine
         fogEmitter.emitterMode = kCAEmitterLayerAdditive
+        fogEmitter.renderMode = kCAEmitterLayerOldestFirst
 
         let fogflake = CAEmitterCell()
+
         fogflake.birthRate = 10
         fogflake.lifetime  = 50
         fogflake.velocity  = -10
@@ -125,5 +136,53 @@ class ViewController: UIViewController {
         self.contentView.layer.addSublayer(rainEmitter)
     }
 
+    func fireworks() {
+        backgroundImage.image = nil
+        fireWorkEmitter.name = "fireWorkEmitterLayer"
+        fireWorkEmitter.emitterShape = kCAEmitterLayerCircle
+        fireWorkEmitter.emitterMode = kCAEmitterLayerOutline
+        fireWorkEmitter.emitterPosition = CGPoint(x: self.view.bounds.midX, y: self.view.bounds.midY)
+        fireWorkEmitter.emitterSize = CGSize(width: 30, height: 0)
+
+        let fireWorkFlake = CAEmitterCell()
+        fireWorkFlake.name = "fireWorkCell"
+        fireWorkFlake.alphaRange = 2.0
+        fireWorkFlake.alphaSpeed = -1.0
+        fireWorkFlake.lifetime   = 0.7
+        fireWorkFlake.lifetimeRange = 0.3
+        fireWorkFlake.birthRate = 0
+        fireWorkFlake.velocity = 40
+        fireWorkFlake.velocityRange = 10
+        fireWorkFlake.emissionRange = .pi / 4
+        fireWorkFlake.scale = 0.05
+        fireWorkFlake.scaleRange = 0.02
+        fireWorkFlake.contents = UIImage(named:"red")?.cgImage
+        self.fireWorks = [fireWorkFlake]
+
+        fireWorkEmitter.emitterCells = [fireWorkFlake]
+        fireWorkEmitter.renderMode = kCAEmitterLayerOldestFirst
+        fireWorkEmitter.masksToBounds = false
+
+        self.contentView.layer.addSublayer(fireWorkEmitter)
+
+    }
+
+    func boom() {
+        // oc 只要用kvo就能解决fireWorks[0]的丑陋写法
+        self.fireWorkEmitter.beginTime = CACurrentMediaTime()
+        self.fireWorkEmitter.lifetime = 0.7
+        self.fireWorks[0].birthRate = 500
+
+        let delay = DispatchTime.now() + 0.2
+        DispatchQueue.main.asyncAfter(deadline: delay) {
+            self.stop()
+        }
+
+    }
+
+    @objc func stop() {
+        self.fireWorkEmitter.lifetime = 0
+        fireWorks[0].lifetime = 0
+    }
 }
 
